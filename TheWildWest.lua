@@ -485,6 +485,37 @@ playercheats:addSlider("HipHeight", 2.5, 2.5, 200, function(Value)
     game.Players.LocalPlayer.Character.Humanoid.HipHeight = tonumber(Value)
 end)
 
+local page6 = venyx:addPage("Horse", 5012544693)
+local animalcheats = page6:addSection("Horse Function")
+
+local OldRidingAnimal = require(game.ReplicatedStorage.Modules.Load.UI.Wildlife.AnimalRiding).GetRidingAnimal()
+animalcheats:addToggle("Infinite Boosts", nil, function(Value)
+    InfiniteBoosts = Value
+    if Value == false then
+        GetRidingAnimal = require(game.ReplicatedStorage.Modules.Load.UI.Wildlife.AnimalRiding).GetRidingAnimal()
+        GetRidingAnimal.MaxBoosts = OldRidingAnimal
+    end
+end)
+
+local page7 = venyx:addPage("Teams", 5012544693)
+local teams = page7:addSection("Switch Teams")
+
+teams:addButton("Mayor", function()
+    Network:FireServer("PickRole", "Mayor")
+end)
+teams:addButton("Sheriff", function()
+    Network:FireServer("PickRole", "Sheriff")
+end)
+teams:addButton("Doctor", function()
+    Network:FireServer("PickRole", "Doctor")
+end)
+teams:addButton("Barkeep", function()
+    Network:FireServer("PickRole", "Barkeep")
+end)
+teams:addButton("Hitman", function()
+    Network:FireServer("PickRole", "Hitman")
+end)
+
 local misc = venyx:addPage("Misc", 5012544693)
 local fullbright = misc:addSection("Full Bright")
 local rejoin = misc:addSection("Rejoin Server")
