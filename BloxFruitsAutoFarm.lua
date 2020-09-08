@@ -1,9 +1,3 @@
---[[
-	ui-engine-v2
-	version 1.3a
-	by Singularity (V3rm @ King Singularity) (Discord @ Singularity#5490)
---]]
-
 local ui_options = {
 	main_color = Color3.fromRGB(41, 74, 122),
 	min_size = Vector2.new(700, 500),
@@ -2024,17 +2018,13 @@ end
 
 local window = library:AddWindow("Blox Fruits AutoFarm by Samild.", {
     main_color = Color3.fromRGB(math.random(0, 200), math.random(0, 200), math.random(0, 200)),
-	min_size = Vector2.new(500, 500),
+	min_size = Vector2.new(500, 945),
 	can_resize = true,
 })
 
 local LocalPlayer = game:GetService'Players'.LocalPlayer
 local HTTP = game:GetService("HttpService")
 local TPService = game:GetService("TeleportService")
-local placeId = game.PlaceId
-local jobId = game.JobId
-local dfesp =  true
-local chestesp =  true
 local gamename
 local desiredquest
 local oldworld
@@ -2043,17 +2033,13 @@ local toolname
 local userInput = game:service('UserInputService')
 local Mouse = game:GetService("Players").LocalPlayer:GetMouse()
 local Autofarm = window:AddTab("Autofarm")
-_G.nododgecool = false
+--local AutoStat = window:AddTab("Auto Stat")
 _G.farm = true
 _G.automelee = false
 _G.autodefense = false
 _G.autosword = false
 _G.autogun = false
 _G.autodf = false
-_G.noclip = false
-_G.dfespactive = false
-_G.chestespactive = false
-_G.flowerespactive = false
 
 function teleport(pos)
         LocalPlayer.Character.HumanoidRootPart.CFrame = (pos)
@@ -2147,6 +2133,90 @@ if newworld then
 end
 end
 
+function initESP()
+	for i,x in pairs(workspace:GetChildren()) do
+		if x.Name:match("Chest") then
+			table.insert(chests, x)
+		end
+		if x.Name == "Fruit" then
+			table.insert(df, x)
+		end
+		if x.Name:match("Flower") then
+			table.insert(flowers, x)
+		end
+	end
+end
+
+initESP();
+
+function updateEsp()
+	workspace.ChildAdded:connect(function(child)
+		if child.Name:match("Chest") then
+			table.insert(chests, child)
+		elseif child.Name == "Fruit" then
+			table.insert(df, child)
+		end
+		if newworld then
+			if child.Name:match("Flower") then
+			table.insert(flowers, child)
+			end
+		end
+	end)
+end
+
+updateEsp();
+
+function dfnotify()
+	for _,v in pairs (workspace:GetChildren()) do
+		if v.Name:match('Fruit') and not v:IsA('Folder') and (v:IsA("Model") or v:IsA("Part")) then
+			local sound = Instance.new("Sound")
+			sound.SoundId = "rbxassetid://170765130"
+			sound.Parent = game.Lighting
+			sound.Volume = 9000
+			sound:Play()
+			game:GetService("StarterGui"):SetCore("SendNotification", {
+	            Title = "Fruit Spawned";
+	            Text = "Fruit Located \n Name : "..v.Name;
+	               Duration = 2e9;
+	            Button1 = "Dismiss"
+            })
+        end
+    end
+    	workspace.ChildAdded:connect(function(x)
+			if x.Name:match("Fruit") and x:FindFirstChild('Fruit') then
+				local sound = Instance.new("Sound")
+				sound.SoundId = "rbxassetid://170765130"
+				sound.Parent = game.Lighting
+				sound.Volume = 9000
+				sound:Play()
+				game:GetService("StarterGui"):SetCore("SendNotification", {
+		            Title = "Fruit Spawned";
+		            Text = "Fruit Located \n Name : "..v.Name;
+		               Duration = 2e9;
+		            Button1 = "Dismiss"
+		            })
+			end
+		end)
+end
+
+dfnotify();
+
+--infinitestam
+local originalstam = LocalPlayer.Character.Energy.Value
+function infinitestam()
+	LocalPlayer.Character.Energy.Changed:connect(function()
+	    LocalPlayer.Character.Energy.Value = originalstam
+	end)
+end
+infinitestam()
+
+LocalPlayer.CharacterAdded:connect(function()
+	wait(0.3)
+	originalstam = LocalPlayer.Character.Energy.Value
+	infinitestam()
+end)
+--infinitestam end
+
 function click()
 	game:GetService'VirtualUser':CaptureController()
 	game:GetService'VirtualUser':Button1Down(Vector2.new(1280, 672))
@@ -2199,484 +2269,472 @@ do
     elseif placeId == 2753915549 then
         gamename = "/UPDATE-10-Blox-Fruits"
         oldworld = true
-end
-
-	--Anti Afk
-	game:GetService'Players'.LocalPlayer.Idled:Connect(function()
-		game:GetService'VirtualUser':CaptureController()
-		game:GetService'VirtualUser':ClickButton2(Vector2.new())
-	end)
-
-	function tpnewserver()
-	    local Serverlist = game:GetService("HttpService"):JSONDecode(game:HttpGet("https://www.roblox.com/games/getgameinstancesjson?placeId=".. placeId.. "&startindex=" .. math.random(150,200)))
-	    print(Serverlist)
-	    local server = Serverlist.Collection[math.random(1,#Serverlist.Collection)]
-	    game:GetService("TeleportService"):TeleportToPlaceInstance(game.PlaceId, server.Guid)
-	end
-
-
-
-local tools = {}
-for _, X in next, LocalPlayer.Backpack:GetChildren() do
-	if X.ClassName == "Tool" then
-	table.insert(tools, X.Name)
-end
-end
-print(unpack(tools))
---Grab the player's icon
-local icon = game:GetService("Players"):GetUserThumbnailAsync(LocalPlayer.UserId, Enum.ThumbnailType.HeadShot, Enum.ThumbnailSize.Size180x180)
-
-if oldworld then
-	function bestfarm()
-		if 	LocalPlayer.Data.Level.Value >= 0 and LocalPlayer.Data.Level.Value < 10 then
-		teleport(CFrame.new(973.320435, 16.3492527, 1549.81885, -0.636105061, 2.36918627e-08, 0.771602452, 4.02189881e-09, 1, -2.73891221e-08, -0.771602452, -1.43190517e-08, -0.636105061))
-		wait(1)
-		autofarm(tostring(toolname), "Bandit", nil, "BanditQuest1", 1)
-
-	elseif LocalPlayer.Data.Level.Value >= 10 and LocalPlayer.Data.Level.Value < 15 then
-		teleport(CFrame.new(-1443.24609, 22.8521042, 161.635147, -0.38530159, -4.39645653e-08, 0.922790706, -3.86702226e-09, 1, 4.60284149e-08, -0.922790706, 1.41663703e-08, -0.38530159))
-		wait(1)
-		autofarm(tostring(toolname), "Monkey", nil, "JungleQuest", 1)
-
-	elseif LocalPlayer.Data.Level.Value >= 15 and LocalPlayer.Data.Level.Value < 30 then
-		teleport(CFrame.new(-1262.90405, 11.2192535, -601.962402, -0.749959588, -8.47150738e-10, -0.661483645, 3.97925082e-10, 1, -1.7318319e-09, 0.661483645, -1.56202484e-09, -0.749959588))
-		wait(1)
-		autofarm(tostring(toolname), ("20"), nil, "JungleQuest", 2)
-
-	elseif LocalPlayer.Data.Level.Value >= 30 and LocalPlayer.Data.Level.Value < 40 then
-		teleport(CFrame.new(-1214.29834, 4.7520504, 3914.19995, 0.202510014, -6.5743599e-08, 0.979280174, -1.00924495e-08, 1, 6.92216773e-08, -0.979280174, -2.39014195e-08, 0.202510014))
-		wait(1)
-		autofarm(tostring(toolname), "Pirate", nil, "BuggyQuest1", 1)
-
-	elseif LocalPlayer.Data.Level.Value >= 40 and LocalPlayer.Data.Level.Value < 60 then
-		teleport(CFrame.new(-1310.4906, 14.869874, 4259.25342, -0.974549353, 8.85998119e-09, -0.224173129, -1.09559695e-08, 1, 8.71518964e-08, 0.224173129, 8.73898571e-08, -0.974549353))
-		wait(1)
-		autofarm(tostring(toolname), "Brute", nil, "BuggyQuest1", 2)
-
-	elseif LocalPlayer.Data.Level.Value >= 60 and LocalPlayer.Data.Level.Value < 75 then
-		teleport(CFrame.new(937.618896, 6.45013809, 4490.11816, 0.647611976, 9.07161848e-08, 0.761970282, -5.56535191e-08, 1, -7.17538526e-08, -0.761970282, 4.06232425e-09, 0.647611976))
-		wait(1)
-		autofarm(tostring(toolname), "Bandit", nil, "DesertQuest", 1)
-
-	elseif LocalPlayer.Data.Level.Value >= 75 and LocalPlayer.Data.Level.Value < 90 then
-		teleport(CFrame.new(1586.36829, 4.21892071, 4376.83984, 0.178952768, -1.03469067e-09, -0.983857691, 1.41175149e-09, 1, -7.94885102e-10, 0.983857691, -1.24671562e-09, 0.178952768))
-		wait(1)
-		autofarm(tostring(toolname), "Officer", nil, "DesertQuest", 2)
-
-	elseif LocalPlayer.Data.Level.Value >= 90 and LocalPlayer.Data.Level.Value < 100 then
-		teleport(CFrame.new(1357.83826, 87.2727661, -1353.2384, 0.605153263, 1.36694718e-08, 0.796108961, 6.53557777e-08, 1, -6.68498146e-08, -0.796108961, 9.24847043e-08, 0.605153263))
-		wait(1)
-		autofarm(tostring(toolname), "Snow Bandit", nil, "SnowQuest", 1)
-
-	elseif LocalPlayer.Data.Level.Value >= 100 and LocalPlayer.Data.Level.Value < 150 then
-		teleport(CFrame.new(1195.7312, 105.774536, -1477.3407, 0.690636218, -1.82257409e-08, 0.723202348, 5.10525788e-10, 1, 2.47139038e-08, -0.723202348, -1.66991025e-08, 0.690636218))
-		wait(1)
-		autofarm(tostring(toolname), "Snowman", nil, "SnowQuest", 2)
-
-	elseif LocalPlayer.Data.Level.Value >= 150 and LocalPlayer.Data.Level.Value < 175 then
-		teleport(CFrame.new(-4949.07178, 278.066345, -2849.6499, 0.998485565, -2.4800201e-08, 0.055014465, 2.03106651e-08, 1, 8.21655775e-08, -0.055014465, -8.09237619e-08, 0.998485565))
-		wait(1)
-		autofarm(tostring(toolname), "Sky Bandit", nil, "SkyQuest", 1)
-
-	elseif LocalPlayer.Data.Level.Value >= 175 and LocalPlayer.Data.Level.Value < 225 then
-		teleport(CFrame.new(-5244.16797, 388.651947, -2275.66016, 0.971692681, -9.60401358e-09, -0.236248419, 2.62311204e-08, 1, 6.72367477e-08, 0.236248419, -7.15305148e-08, 0.971692681))
-		wait(1)
-		autofarm(tostring(toolname), "Master", nil, "SkyQuest", 2)
-
-	elseif LocalPlayer.Data.Level.Value >= 225 and LocalPlayer.Data.Level.Value < 275 then
-		teleport(CFrame.new(-1987.04883, 7.28907251, -2781.30933, -0.128573, 2.62617483e-08, -0.991700053, 3.94706934e-10, 1, 2.6430369e-08, 0.991700053, 3.00680103e-09, -0.128573))
-		wait(1)
-		autofarm(tostring(toolname), "Warrior", nil, "ColosseumQuest", 1)
-
-	elseif LocalPlayer.Data.Level.Value >= 275 and LocalPlayer.Data.Level.Value < 300 then
-		teleport(CFrame.new(-1223.63818, 7.28907347, -3182.85132, 0.483049542, -3.85618115e-09, 0.875593007, 1.50635823e-11, 1, 4.39576908e-09, -0.875593007, -2.11018469e-09, 0.483049542))
-		wait(1)
-		autofarm(tostring(toolname), "Gladiator", nil, "ColosseumQuest", 2)
-
-	elseif LocalPlayer.Data.Level.Value >= 300 and LocalPlayer.Data.Level.Value < 330 then
-		teleport(CFrame.new(-5509.77148, 8.59067249, 8401.50684, -0.998448312, -6.22276808e-09, -0.0556865074, -3.02297587e-09, 1, -5.75450514e-08, 0.0556865074, -5.72874193e-08, -0.998448312))
-		wait(1)
-		autofarm(tostring(toolname), "Soldier", nil, "MagmaQuest", 1)
-
-	elseif LocalPlayer.Data.Level.Value >= 330 and LocalPlayer.Data.Level.Value < 375 then
-		teleport(CFrame.new(-5863.0498, 77.251709, 8858.89746, 0.199920639, 3.6500257e-08, -0.979812086, -5.66507126e-08, 1, 2.56933035e-08, 0.979812086, 5.03704349e-08, 0.199920639))
-		wait(1)
-		autofarm(tostring(toolname), "Spy", nil, "MagmaQuest", 2)
-
-	elseif LocalPlayer.Data.Level.Value >= 375 and LocalPlayer.Data.Level.Value < 400 then
-		teleport(CFrame.new(60867.6289, 18.4828224, 1577.58496, 0.025405515, -5.02673139e-08, -0.999677241, 3.65793262e-08, 1, -4.93539289e-08, 0.999677241, -3.53136578e-08, 0.025405515))
-		wait(1)
-		autofarm(tostring(toolname), "Fishman Warrior", nil, "FishmanQuest", 1)
-
-	elseif LocalPlayer.Data.Level.Value >= 400 and LocalPlayer.Data.Level.Value < 425 then
-		teleport(CFrame.new(61912.7852, 18.4828186, 1434.92773, -0.665761292, 2.24700969e-08, 0.746164799, -3.21811271e-08, 1, -5.88275455e-08, -0.746164799, -6.31775308e-08, -0.665761292))
-		wait(1)
-		autofarm(tostring(toolname), "Commando", nil, "FishmanQuest", 2)
-
-	elseif LocalPlayer.Data.Level.Value >= 400 and LocalPlayer.Data.Level.Value < 425 then
-		teleport(CFrame.new(-4696.40283, 845.276978, -1858.34204, -0.7335338, 4.7135746e-08, 0.679652929, 6.09196249e-08, 1, -3.60351637e-09, -0.679652929, 3.8760902e-08, -0.7335338))
-		wait(1)
-		autofarm(tostring(toolname), "God's Guard", nil, "SkyExp1Quest", 1)
-
-	elseif LocalPlayer.Data.Level.Value >= 400 and LocalPlayer.Data.Level.Value < 425 then
-		teleport(CFrame.new(-7641.76465, 5545.4917, -513.16803, -0.497225702, 9.03651625e-08, 0.867621243, 1.49193262e-08, 1, -9.56026511e-08, -0.867621243, -3.45917712e-08, -0.497225702))
-		wait(1)
-		autofarm(tostring(toolname), "Shanda", nil, "SkyExp1Quest", 2)
-
-	elseif LocalPlayer.Data.Level.Value >= 400 and LocalPlayer.Data.Level.Value < 425 then
-		teleport(CFrame.new(-7714.11816, 5610.58545, -1431.8667, 0.455687642, -5.21712593e-08, -0.890139759, -2.28576624e-09, 1, -5.97803336e-08, 0.890139759, 2.9275812e-08, 0.455687642))
-		wait(1)
-		autofarm(tostring(toolname), "Royal Squad", nil, "SkyExp2Quest", 1)
-
-	elseif LocalPlayer.Data.Level.Value >= 400 and LocalPlayer.Data.Level.Value < 425 then
-		teleport(CFrame.new(-7835.0542, 5606.87695, -1813.72021, -0.912228286, 2.86517281e-08, -0.409682304, 4.18481925e-08, 1, -2.32457609e-08, 0.409682304, -3.83499028e-08, -0.912228286))
-		wait(1)
-		autofarm(tostring(toolname), "Royal Soldier", nil, "SkyExp2Quest", 2)
-
-	elseif LocalPlayer.Data.Level.Value >= 400 and LocalPlayer.Data.Level.Value < 425 then
-		teleport(CFrame.new(5589.01758, 38.5386276, 3982.86963, 0.98995316, -4.44696457e-09, 0.141395777, 8.03524003e-09, 1, -2.4806587e-08, -0.141395777, 2.56935078e-08, 0.98995316))
-		wait(1)
-		autofarm(tostring(toolname), "Galley Pirate", nil, "FountainQuest", 1)
-
-	elseif LocalPlayer.Data.Level.Value >= 400 and LocalPlayer.Data.Level.Value < 425 then
-		teleport(CFrame.new(5477.20557, 38.4976692, 4949.44043, 0.935791492, 1.595469e-08, -0.352554023, 3.0879046e-09, 1, 5.34508864e-08, 0.352554023, -5.11075378e-08, 0.935791492))
-		wait(1)
-		autofarm(tostring(toolname), "Galley Captain", nil, "FountainQuest", 2)
-	end
-end
-
-Autofarm:AddSwitch("Toggle", function(bool)
-        _G.farm = bool
-        print(_G.farm)
-end)
-
-local toolname
-local tooldropdown = Autofarm:AddDropdown("Use Tool", function(text)
-	if LocalPlayer.Backpack:FindFirstChild(tostring(text)) then
-		toolname = LocalPlayer.Backpack[tostring(text)]
-	end
-end)
-
-for i=1, #tools do
-	local tool = tools[i]
-	tooldropdown:Add(tostring(tool))
-end
-
-Autofarm:AddButton("Level Farm", function()
-	bestfarm()
-	LocalPlayer.Data.Level.Changed:connect(function()
-		_G.farm = false
-		wait(1)
-		bestfarm()
-	end)
-end)
-
---[[
-Autofarm:AddButton("Bandits", function()
-	autofarm(tostring(toolname), "Bandit", nil, "BanditQuest1", 1)
-end)
-
-Autofarm:AddButton("Monkeys", function()
-	autofarm(tostring(toolname), "Monkey", nil, "JungleQuest", 1)
-end)
-
-Autofarm:AddButton("Gorillas", function()
-	autofarm(tostring(toolname), "Gorilla", "King", "JungleQuest", 2)
-end)
-
-Autofarm:AddButton("Buggy Pirate", function()
-	autofarm(tostring(toolname), "Pirate", nil, "BuggyQuest1", 1)
-end)
-
-Autofarm:AddButton("Brute", function()
-	autofarm(tostring(toolname), "Brute", nil, "BuggyQuest1", 2)
-end)			
-
-Autofarm:AddButton("Desert Bandit", function()
-	autofarm(tostring(toolname), "Bandit", nil, "DesertQuest", 1)
-end)
-
-Autofarm:AddButton("Desert Officer", function()
-	autofarm(tostring(toolname), "Officer", nil, "DesertQuest", 2)
-end)
-
-Autofarm:AddButton("Snow Bandit", function()
-	autofarm(tostring(toolname), "Snow Bandit", nil, "SnowQuest", 1)
-end)
-
-Autofarm:AddButton("Snowman", function()
-	autofarm(tostring(toolname), "Snowman", nil, "SnowQuest", 2)
-end)
-
-Autofarm:AddButton("Sky Bandit", function()
-	autofarm(tostring(toolname), "Sky Bandit", nil, "SkyQuest", 1)
-end)
-
-Autofarm:AddButton("Dark Master", function()
-	autofarm(tostring(toolname), "Master", nil, "SkyQuest", 2)
-end)
-
-Autofarm:AddButton("Toga Warrior", function()
-	autofarm(tostring(toolname), "Warrior", nil, "ColosseumQuest", 1)
-end)
-
-Autofarm:AddButton("Gladiator", function()
-	autofarm(tostring(toolname), "Gladiator", nil, "ColosseumQuest", 2)
-end)
-
-Autofarm:AddButton("Warden", function()
-	autofarm(tostring(toolname), "Warden", nil, "ImpelQuest", 1)
-end)
-
-Autofarm:AddButton("Chief Warden", function()
-	autofarm(tostring(toolname), "Chief Warden", nil, "ImpelQuest", 2)
-end)
-
-Autofarm:AddButton("Swan", function()
-	autofarm(tostring(toolname), "Swan", nil, "ImpelQuest", 3)
-end)
-
-Autofarm:AddButton("Military Soldier", function()
-	autofarm(tostring(toolname), "Soldier", nil, "MagmaQuest", 1)
-end)
-
-Autofarm:AddButton("Military Spy", function()
-	autofarm(tostring(toolname), "Spy", nil, "MagmaQuest", 2)
-end)
-
-Autofarm:AddButton("Magma Admiral", function()
-	autofarm(tostring(toolname), "Admiral", nil, "MagmaQuest", 3)
-end)
-
-Autofarm:AddButton("Fishman Warrior", function()
-	autofarm(tostring(toolname), "Fishman Warrior", nil, "FishmanQuest", 1)
-end)
-
-Autofarm:AddButton("Fishman Commando", function()
-autofarm(tostring(toolname), "Commando", nil, "FishmanQuest", 2)
-end)
-
-Autofarm:AddButton("Fishman Jones", function()
-autofarm(tostring(toolname), "Jones", nil, "FishmanQuest", 3)
-end)
-
-Autofarm:AddButton("God's Guard", function()
-autofarm(tostring(toolname), "God's Guard", nil, "SkyExp1Quest", 1)
-end)
-
-Autofarm:AddButton("Shanda", function()
-autofarm(tostring(toolname), "Shanda", nil, "SkyExp1Quest", 2)
-end)
-
-Autofarm:AddButton("Wysper", function()
-autofarm(tostring(toolname), "Wysper", nil, "SkyExp1Quest", 3)
-end)
-
-Autofarm:AddButton("Royal Squad", function()
-autofarm(tostring(toolname), "Royal Squad", nil, "SkyExp2Quest", 1)
-end)
-
-Autofarm:AddButton("Royal Soldier", function()
-autofarm(tostring(toolname), "Royal Soldier", nil, "SkyExp2Quest", 2)
-end)
-
-Autofarm:AddButton("Thunder God", function()
-autofarm(tostring(toolname), "Thunder God", nil, "SkyExp2Quest", 3)
-end)
-
-Autofarm:AddButton("Galley Pirate", function()
-autofarm(tostring(toolname), "Galley Pirate", nil, "FountainQuest", 1)
-end)
-
-Autofarm:AddButton("Galley Captain", function()
-autofarm(tostring(toolname), "Galley Captain", nil, "FountainQuest", 2)
-end)
-
-Autofarm:AddButton("Cyborg", function()
-autofarm(tostring(toolname), "Cyborg", nil, "FountainQuest", 3)
-end)
-
-Autofarm:AddButton("Ice Admiral", function()
-autofarm(tostring(toolname), "Ice Admiral", nil, nil, nil)
-end)
-]]
-
-end
-if newworld then
-	local floweresp = true
-Autofarm:AddSwitch("Toggle", function(bool)
-        _G.farm = bool
-        print(_G.farm)
-end)
-local toolname
-local tooldropdown = Autofarm:AddDropdown("Use Tool", function(text)
-	if LocalPlayer.Backpack:FindFirstChild(tostring(text)) then
-		toolname = LocalPlayer.Backpack[tostring(text)]
-	end
-end)
-
-for i=1, #tools do
-	local tool = tools[i]
-	tooldropdown:Add(tostring(tool))
-end
-
-LocalPlayer.Backpack.ChildAdded:connect(function(child)
-	tooldropdown:Add(tostring(child.Name))
-end)
-
-Autofarm:AddButton("Raider", function()
-	teleport(CFrame.new(-121.149246, 39.0797539, 2369.0332, 0.968202889, 2.4016245e-08, 0.250166208, -1.94774046e-08, 1, -2.06189554e-08, -0.250166208, 1.50907447e-08, 0.968202889))
-	wait(1)
-autofarm(tostring(toolname), "Raider", nil, "Area1Quest", 1)
-end)
-
-Autofarm:AddButton("Mercenary", function()
-	teleport(CFrame.new(-803.078003, 73.1196899, 1690.83899, 0.00951899588, 3.24957554e-08, 0.9999547, -2.01763513e-08, 1, -3.23051594e-08, -0.9999547, -1.98679242e-08, 0.00951899588))
-	wait(1)
-autofarm(tostring(toolname), "Mercenary", nil, "Area1Quest", 2)
-end)
-
-Autofarm:AddButton("Diamond", function()
-	teleport(CFrame.new(-1711.10999, 198.646606, 36.8653908, 0.872542739, -6.97004552e-08, 0.488537759, 9.2724818e-08, 1, -2.29376589e-08, -0.488537759, 6.53136638e-08, 0.872542739))
-	wait(1)
-autofarm(tostring(toolname), "Diamond", nil, "Area1Quest", 3)
-end)
-
-Autofarm:AddButton("Swan Pirate", function()
-	teleport(CFrame.new(893.166565, 73.0697327, 1147.42651, -0.999840379, -5.55143664e-08, -0.0178658348, -5.55763684e-08, 1, 2.97384384e-09, 0.0178658348, 3.9662873e-09, -0.999840379))
-	wait(1)
-autofarm(tostring(toolname), "Swan Pirate", nil, "Area2Quest", 1)
-end)
-
-Autofarm:AddButton("Factory Staff", function()
-	teleport(CFrame.new(167.018753, 73.0686951, -164.64502, 0.725492358, -4.73446917e-08, -0.688230276, 1.24810228e-07, 1, 6.27757473e-08, 0.688230276, -1.31441496e-07, 0.725492358))
-	wait(1)
-autofarm(tostring(toolname), "Factory Staff", nil, "Area2Quest", 2)
-end)
-
-Autofarm:AddButton("Jeremy", function()
-autofarm(tostring(toolname), "Jeremy", nil, "Area2Quest", 3)
-end)
-
-Autofarm:AddButton("Marine Lieutenant", function()
-	teleport(CFrame.new(-2786.62183, 72.9661102, -3031.87476, -0.240379378, -9.12769167e-08, 0.970679045, 4.44070238e-08, 1, 1.05031063e-07, -0.970679045, 6.83522643e-08, -0.240379378))
-	wait(1)
-autofarm(tostring(toolname), "Marine Lieutenant", nil, "MarineQuest3", 1)
-end)
-
-Autofarm:AddButton("Marine Captain", function()
-	teleport(CFrame.new(-2023.63354, 72.9661102, -3255.90576, 0.848725617, 9.29678279e-10, -0.528833508, -4.68628123e-08, 1, -7.34522132e-08, 0.528833508, 8.71233965e-08, 0.848725617))
-	wait(1)
-autofarm(tostring(toolname), "Marine Captain", nil, "MarineQuest3", 2)
-end)
-
-Autofarm:AddButton("Fajita", function()
-	teleport(CFrame.new(-2153.6731, 72.9661102, -4241.20508, 0.999911308, 8.00685651e-09, -0.0133165959, -7.94380561e-09, 1, 4.78771467e-09, 0.0133165959, -4.68150585e-09, 0.999911308))
-	wait(1)
-autofarm(tostring(toolname), "Fajita", nil, "MarineQuest3", 3)
-end)
-
-Autofarm:AddButton("Zombie", function()
-	teleport(CFrame.new(-5672.71143, 48.4801941, -655.884766, 0.428546607, -4.94537318e-08, 0.90351969, 1.18672972e-07, 1, -1.55300306e-09, -0.90351969, 1.07888901e-07, 0.428546607))
-	wait(1)
-autofarm(tostring(toolname), "Zombie", nil, "ZombieQuest", 1)
-end)
-
-Autofarm:AddButton("Vampire", function()
-	teleport(CFrame.new(-5981.06445, 6.40269995, -1316.19409, 0.456913412, -9.74204681e-08, 0.889511168, 5.04610185e-08, 1, 8.36011438e-08, -0.889511168, 6.68715616e-09, 0.456913412))
-	wait(1)
-autofarm(tostring(toolname), "Vampire", nil, "ZombieQuest", 2)
-end)
-
-Autofarm:AddButton("Snow Trooper", function()
-	teleport(CFrame.new(593.259888, 401.421936, -5546.1001, 0.986214757, 9.62643938e-08, -0.165470347, -1.06199984e-07, 1, -5.11970981e-08, 0.165470347, 6.80642813e-08, 0.986214757))
-	wait(1)
-autofarm(tostring(toolname), "Snow Trooper", nil, "SnowMountainQuest", 1)
-end)
-
-Autofarm:AddButton("Winter Warrior", function()
-	teleport(CFrame.new(1331.75439, 429.421875, -5318.35547, 0.825170577, 5.72686742e-09, 0.56488359, -1.10307963e-09, 1, -8.52678017e-09, -0.56488359, 6.41293685e-09, 0.825170577))
-	wait(1)
-autofarm(tostring(toolname), "Winter Warrior", nil, "SnowMountainQuest", 2)
-end)
-
-Autofarm:AddButton("Lab Subordinate", function()
-	teleport(CFrame.new(-5814.375, 15.9517574, -4429.76172, 0.364512295, -5.59861562e-08, 0.931198597, 2.32149766e-08, 1, 5.10353146e-08, -0.931198597, 3.01475378e-09, 0.364512295))
-	wait(1)
-autofarm(tostring(toolname), "Lab Subordinate", nil, "IceSideQuest", 1)
-end)
-
-Autofarm:AddButton("Horned Warrior", function()
-	teleport(CFrame.new(-6361.49268, 26.559988, -5887.49414, -0.934038699, -1.2254131e-08, -0.357171863, 7.46332418e-09, 1, -5.38260885e-08, 0.357171863, -5.29413384e-08, -0.934038699))
-	wait(1)
-autofarm(tostring(toolname), "Horned Warrior", nil, "IceSideQuest", 2)
-end)
-
-Autofarm:AddButton("Smoke Admiral", function()
-	teleport(CFrame.new(-5101.09131, 23.7314548, -5341.89941, 0.330702484, 9.46945411e-10, -0.943735063, 6.24650165e-10, 1, 1.22229094e-09, 0.943735063, -9.93718885e-10, 0.330702484))
-	wait(1)
-autofarm(tostring(toolname), "Smoke Admiral", nil, "IceSideQuest", 3)
-end)
-
-Autofarm:AddButton("Magma Ninja", function()
-	teleport(CFrame.new(-5186.00635, 15.9518795, -6115.89355, -0.164513826, -4.62587586e-08, 0.986374795, 4.05046237e-08, 1, 5.36533662e-08, -0.986374795, 4.87794587e-08, -0.164513826))
-	wait(1)
-autofarm(tostring(toolname), "Magma Ninja", nil, "FireSideQuest", 1)
-end)
-
-Autofarm:AddButton("Lava Pirate", function()
-	teleport(CFrame.new(-5133.50098, 16.1205902, -4837.5752, -0.196734294, 1.91304856e-08, -0.980456829, -1.89785787e-08, 1, 2.33199682e-08, 0.980456829, 2.31955148e-08, -0.196734294))
-	wait(1)
-autofarm(tostring(toolname), "Lava Pirate", nil, "FireSideQuest", 2)
-end)
-
-Autofarm:AddButton("Swan Pirate (Barlito)", function()
-	teleport(CFrame.new(893.166565, 73.0697327, 1147.42651, -0.999840379, -5.55143664e-08, -0.0178658348, -5.55763684e-08, 1, 2.97384384e-09, 0.0178658348, 3.9662873e-09, -0.999840379))
-	wait(1)
-autofarm(tostring(toolname), "Swan Pirate", nil, "BartiloQuest", 1)
-end)
-
-ESP:AddButton("Flower ESP", function()
-	for _,v in pairs (workspace:GetChildren()) do
-		if v.Name:match('Flower') then
-		    local BillboardGui = Instance.new("BillboardGui")
-	        local TextLabel = Instance.new("TextLabel")
-	        BillboardGui.Parent = v
-	        BillboardGui.AlwaysOnTop = true
-	        BillboardGui.LightInfluence = 1
-	        BillboardGui.Size = UDim2.new(0, 25, 0, 25)
-	        BillboardGui.StudsOffset = Vector3.new(0, 2, 0)
-	        TextLabel.Parent = BillboardGui
-	        TextLabel.BackgroundColor3 = Color3.new(1, 1, 1)
-	        TextLabel.BackgroundTransparency = 1
-	        TextLabel.Size = UDim2.new(2, 0, 2, 0)
-	        TextLabel.Text = v.Name
-	        TextLabel.TextScaled = true
-			TextLabel.Font = "SourceSans"
-			TextLabel.TextColor3 = Color3.fromRGB(255, 171, 254)
-		end
     end
 
-	workspace.ChildAdded:connect(function(x)
-		if x.Name:match("Flower") then
-			local BillboardGui = Instance.new("BillboardGui")
-	        local TextLabel = Instance.new("TextLabel")
-	        BillboardGui.Parent = x
-	        BillboardGui.AlwaysOnTop = true
-	        BillboardGui.LightInfluence = 1
-	        BillboardGui.Size = UDim2.new(0, 25, 0, 25)
-	        BillboardGui.StudsOffset = Vector3.new(0, 2, 0)
-	        TextLabel.Parent = BillboardGui
-	        TextLabel.BackgroundColor3 = Color3.new(1, 1, 1)
-	        TextLabel.BackgroundTransparency = 1
-	        TextLabel.Size = UDim2.new(2, 0, 2, 0)
-	        TextLabel.Text = x.Name
-	        TextLabel.TextColor3 = Color3.fromRGB(255, 171, 254)
-	        TextLabel.TextScaled = true
-			TextLabel.Font = "SourceSans"
-	    end
-	end)
-end)
-end
+    local tools = {}
+    for _, X in next, LocalPlayer.Backpack:GetChildren() do
+        if X.ClassName == "Tool" then
+            table.insert(tools, X.Name)
+        end
+    end
+    print(unpack(tools))
+
+    local icon = game:GetService("Players"):GetUserThumbnailAsync(LocalPlayer.UserId, Enum.ThumbnailType.HeadShot, Enum.ThumbnailSize.Size180x180)
+
+    if oldworld then
+        function bestfarm()
+            if 	LocalPlayer.Data.Level.Value >= 0 and LocalPlayer.Data.Level.Value < 10 then
+                teleport(CFrame.new(973.320435, 16.3492527, 1549.81885, -0.636105061, 2.36918627e-08, 0.771602452, 4.02189881e-09, 1, -2.73891221e-08, -0.771602452, -1.43190517e-08, -0.636105061))
+                wait(1)
+                autofarm(tostring(toolname), "Bandit", nil, "BanditQuest1", 1)
+
+            elseif LocalPlayer.Data.Level.Value >= 10 and LocalPlayer.Data.Level.Value < 15 then
+                teleport(CFrame.new(-1443.24609, 22.8521042, 161.635147, -0.38530159, -4.39645653e-08, 0.922790706, -3.86702226e-09, 1, 4.60284149e-08, -0.922790706, 1.41663703e-08, -0.38530159))
+                wait(1)
+                autofarm(tostring(toolname), "Monkey", nil, "JungleQuest", 1)
+
+            elseif LocalPlayer.Data.Level.Value >= 15 and LocalPlayer.Data.Level.Value < 30 then
+                teleport(CFrame.new(-1262.90405, 11.2192535, -601.962402, -0.749959588, -8.47150738e-10, -0.661483645, 3.97925082e-10, 1, -1.7318319e-09, 0.661483645, -1.56202484e-09, -0.749959588))
+                wait(1)
+                autofarm(tostring(toolname), ("20"), nil, "JungleQuest", 2)
+
+            elseif LocalPlayer.Data.Level.Value >= 30 and LocalPlayer.Data.Level.Value < 40 then
+                teleport(CFrame.new(-1214.29834, 4.7520504, 3914.19995, 0.202510014, -6.5743599e-08, 0.979280174, -1.00924495e-08, 1, 6.92216773e-08, -0.979280174, -2.39014195e-08, 0.202510014))
+                wait(1)
+                autofarm(tostring(toolname), "Pirate", nil, "BuggyQuest1", 1)
+
+            elseif LocalPlayer.Data.Level.Value >= 40 and LocalPlayer.Data.Level.Value < 60 then
+                teleport(CFrame.new(-1310.4906, 14.869874, 4259.25342, -0.974549353, 8.85998119e-09, -0.224173129, -1.09559695e-08, 1, 8.71518964e-08, 0.224173129, 8.73898571e-08, -0.974549353))
+                wait(1)
+                autofarm(tostring(toolname), "Brute", nil, "BuggyQuest1", 2)
+
+            elseif LocalPlayer.Data.Level.Value >= 60 and LocalPlayer.Data.Level.Value < 75 then
+                teleport(CFrame.new(937.618896, 6.45013809, 4490.11816, 0.647611976, 9.07161848e-08, 0.761970282, -5.56535191e-08, 1, -7.17538526e-08, -0.761970282, 4.06232425e-09, 0.647611976))
+                wait(1)
+                autofarm(tostring(toolname), "Bandit", nil, "DesertQuest", 1)
+
+            elseif LocalPlayer.Data.Level.Value >= 75 and LocalPlayer.Data.Level.Value < 90 then
+                teleport(CFrame.new(1586.36829, 4.21892071, 4376.83984, 0.178952768, -1.03469067e-09, -0.983857691, 1.41175149e-09, 1, -7.94885102e-10, 0.983857691, -1.24671562e-09, 0.178952768))
+                wait(1)
+                autofarm(tostring(toolname), "Officer", nil, "DesertQuest", 2)
+
+            elseif LocalPlayer.Data.Level.Value >= 90 and LocalPlayer.Data.Level.Value < 100 then
+                teleport(CFrame.new(1357.83826, 87.2727661, -1353.2384, 0.605153263, 1.36694718e-08, 0.796108961, 6.53557777e-08, 1, -6.68498146e-08, -0.796108961, 9.24847043e-08, 0.605153263))
+                wait(1)
+                autofarm(tostring(toolname), "Snow Bandit", nil, "SnowQuest", 1)
+
+            elseif LocalPlayer.Data.Level.Value >= 100 and LocalPlayer.Data.Level.Value < 150 then
+                teleport(CFrame.new(1195.7312, 105.774536, -1477.3407, 0.690636218, -1.82257409e-08, 0.723202348, 5.10525788e-10, 1, 2.47139038e-08, -0.723202348, -1.66991025e-08, 0.690636218))
+                wait(1)
+                autofarm(tostring(toolname), "Snowman", nil, "SnowQuest", 2)
+
+            elseif LocalPlayer.Data.Level.Value >= 150 and LocalPlayer.Data.Level.Value < 175 then
+                teleport(CFrame.new(-4949.07178, 278.066345, -2849.6499, 0.998485565, -2.4800201e-08, 0.055014465, 2.03106651e-08, 1, 8.21655775e-08, -0.055014465, -8.09237619e-08, 0.998485565))
+                wait(1)
+                autofarm(tostring(toolname), "Sky Bandit", nil, "SkyQuest", 1)
+
+            elseif LocalPlayer.Data.Level.Value >= 175 and LocalPlayer.Data.Level.Value < 225 then
+                teleport(CFrame.new(-5244.16797, 388.651947, -2275.66016, 0.971692681, -9.60401358e-09, -0.236248419, 2.62311204e-08, 1, 6.72367477e-08, 0.236248419, -7.15305148e-08, 0.971692681))
+                wait(1)
+                autofarm(tostring(toolname), "Master", nil, "SkyQuest", 2)
+
+            elseif LocalPlayer.Data.Level.Value >= 225 and LocalPlayer.Data.Level.Value < 275 then
+                teleport(CFrame.new(-1987.04883, 7.28907251, -2781.30933, -0.128573, 2.62617483e-08, -0.991700053, 3.94706934e-10, 1, 2.6430369e-08, 0.991700053, 3.00680103e-09, -0.128573))
+                wait(1)
+                autofarm(tostring(toolname), "Warrior", nil, "ColosseumQuest", 1)
+
+            elseif LocalPlayer.Data.Level.Value >= 275 and LocalPlayer.Data.Level.Value < 300 then
+                teleport(CFrame.new(-1223.63818, 7.28907347, -3182.85132, 0.483049542, -3.85618115e-09, 0.875593007, 1.50635823e-11, 1, 4.39576908e-09, -0.875593007, -2.11018469e-09, 0.483049542))
+                wait(1)
+                autofarm(tostring(toolname), "Gladiator", nil, "ColosseumQuest", 2)
+
+            elseif LocalPlayer.Data.Level.Value >= 300 and LocalPlayer.Data.Level.Value < 330 then
+                teleport(CFrame.new(-5509.77148, 8.59067249, 8401.50684, -0.998448312, -6.22276808e-09, -0.0556865074, -3.02297587e-09, 1, -5.75450514e-08, 0.0556865074, -5.72874193e-08, -0.998448312))
+                wait(1)
+                autofarm(tostring(toolname), "Soldier", nil, "MagmaQuest", 1)
+
+            elseif LocalPlayer.Data.Level.Value >= 330 and LocalPlayer.Data.Level.Value < 375 then
+                teleport(CFrame.new(-5863.0498, 77.251709, 8858.89746, 0.199920639, 3.6500257e-08, -0.979812086, -5.66507126e-08, 1, 2.56933035e-08, 0.979812086, 5.03704349e-08, 0.199920639))
+                wait(1)
+                autofarm(tostring(toolname), "Spy", nil, "MagmaQuest", 2)
+
+            elseif LocalPlayer.Data.Level.Value >= 375 and LocalPlayer.Data.Level.Value < 400 then
+                teleport(CFrame.new(60867.6289, 18.4828224, 1577.58496, 0.025405515, -5.02673139e-08, -0.999677241, 3.65793262e-08, 1, -4.93539289e-08, 0.999677241, -3.53136578e-08, 0.025405515))
+                wait(1)
+                autofarm(tostring(toolname), "Fishman Warrior", nil, "FishmanQuest", 1)
+
+            elseif LocalPlayer.Data.Level.Value >= 400 and LocalPlayer.Data.Level.Value < 425 then
+                teleport(CFrame.new(61912.7852, 18.4828186, 1434.92773, -0.665761292, 2.24700969e-08, 0.746164799, -3.21811271e-08, 1, -5.88275455e-08, -0.746164799, -6.31775308e-08, -0.665761292))
+                wait(1)
+                autofarm(tostring(toolname), "Commando", nil, "FishmanQuest", 2)
+
+            elseif LocalPlayer.Data.Level.Value >= 400 and LocalPlayer.Data.Level.Value < 425 then
+                teleport(CFrame.new(-4696.40283, 845.276978, -1858.34204, -0.7335338, 4.7135746e-08, 0.679652929, 6.09196249e-08, 1, -3.60351637e-09, -0.679652929, 3.8760902e-08, -0.7335338))
+                wait(1)
+                autofarm(tostring(toolname), "God's Guard", nil, "SkyExp1Quest", 1)
+
+            elseif LocalPlayer.Data.Level.Value >= 400 and LocalPlayer.Data.Level.Value < 425 then
+                teleport(CFrame.new(-7641.76465, 5545.4917, -513.16803, -0.497225702, 9.03651625e-08, 0.867621243, 1.49193262e-08, 1, -9.56026511e-08, -0.867621243, -3.45917712e-08, -0.497225702))
+                wait(1)
+                autofarm(tostring(toolname), "Shanda", nil, "SkyExp1Quest", 2)
+
+            elseif LocalPlayer.Data.Level.Value >= 400 and LocalPlayer.Data.Level.Value < 425 then
+                teleport(CFrame.new(-7714.11816, 5610.58545, -1431.8667, 0.455687642, -5.21712593e-08, -0.890139759, -2.28576624e-09, 1, -5.97803336e-08, 0.890139759, 2.9275812e-08, 0.455687642))
+                wait(1)
+                autofarm(tostring(toolname), "Royal Squad", nil, "SkyExp2Quest", 1)
+
+            elseif LocalPlayer.Data.Level.Value >= 400 and LocalPlayer.Data.Level.Value < 425 then
+                teleport(CFrame.new(-7835.0542, 5606.87695, -1813.72021, -0.912228286, 2.86517281e-08, -0.409682304, 4.18481925e-08, 1, -2.32457609e-08, 0.409682304, -3.83499028e-08, -0.912228286))
+                wait(1)
+                autofarm(tostring(toolname), "Royal Soldier", nil, "SkyExp2Quest", 2)
+
+            elseif LocalPlayer.Data.Level.Value >= 400 and LocalPlayer.Data.Level.Value < 425 then
+                teleport(CFrame.new(5589.01758, 38.5386276, 3982.86963, 0.98995316, -4.44696457e-09, 0.141395777, 8.03524003e-09, 1, -2.4806587e-08, -0.141395777, 2.56935078e-08, 0.98995316))
+                wait(1)
+                autofarm(tostring(toolname), "Galley Pirate", nil, "FountainQuest", 1)
+
+            elseif LocalPlayer.Data.Level.Value >= 400 and LocalPlayer.Data.Level.Value < 425 then
+                teleport(CFrame.new(5477.20557, 38.4976692, 4949.44043, 0.935791492, 1.595469e-08, -0.352554023, 3.0879046e-09, 1, 5.34508864e-08, 0.352554023, -5.11075378e-08, 0.935791492))
+                wait(1)
+                autofarm(tostring(toolname), "Galley Captain", nil, "FountainQuest", 2)
+            end
+        end
+    end
+
+    Autofarm:AddLabel("Press RightControl to toggle the GUI")
+
+    Autofarm:AddSwitch("Toggle", function(bool)
+            _G.farm = bool
+            print(_G.farm)
+    end)
+
+    local toolname
+    local tooldropdown = Autofarm:AddDropdown("Use Tool", function(text)
+        if LocalPlayer.Backpack:FindFirstChild(tostring(text)) then
+            toolname = LocalPlayer.Backpack[tostring(text)]
+        end
+    end)
+
+    for i=1, #tools do
+        local tool = tools[i]
+        tooldropdown:Add(tostring(tool))
+    end
+
+    Autofarm:AddButton("Level Farm", function()
+        bestfarm()
+        LocalPlayer.Data.Level.Changed:connect(function()
+            _G.farm = false
+            wait(1)
+            bestfarm()
+        end)
+    end)
+    Autofarm:AddButton("Bandits", function()
+        autofarm(tostring(toolname), "Bandit", nil, "BanditQuest1", 1)
+    end)
+
+    Autofarm:AddButton("Monkeys", function()
+        autofarm(tostring(toolname), "Monkey", nil, "JungleQuest", 1)
+    end)
+
+    Autofarm:AddButton("Gorillas", function()
+        autofarm(tostring(toolname), "Gorilla", "King", "JungleQuest", 2)
+    end)
+
+    Autofarm:AddButton("Buggy Pirate", function()
+        autofarm(tostring(toolname), "Pirate", nil, "BuggyQuest1", 1)
+    end)
+
+    Autofarm:AddButton("Brute", function()
+        autofarm(tostring(toolname), "Brute", nil, "BuggyQuest1", 2)
+    end)			
+
+    Autofarm:AddButton("Desert Bandit", function()
+        autofarm(tostring(toolname), "Bandit", nil, "DesertQuest", 1)
+    end)
+
+    Autofarm:AddButton("Desert Officer", function()
+        autofarm(tostring(toolname), "Officer", nil, "DesertQuest", 2)
+    end)
+
+    Autofarm:AddButton("Snow Bandit", function()
+        autofarm(tostring(toolname), "Snow Bandit", nil, "SnowQuest", 1)
+    end)
+
+    Autofarm:AddButton("Snowman", function()
+        autofarm(tostring(toolname), "Snowman", nil, "SnowQuest", 2)
+    end)
+
+    Autofarm:AddButton("Sky Bandit", function()
+        autofarm(tostring(toolname), "Sky Bandit", nil, "SkyQuest", 1)
+    end)
+
+    Autofarm:AddButton("Dark Master", function()
+        autofarm(tostring(toolname), "Master", nil, "SkyQuest", 2)
+    end)
+
+    Autofarm:AddButton("Toga Warrior", function()
+        autofarm(tostring(toolname), "Warrior", nil, "ColosseumQuest", 1)
+    end)
+
+    Autofarm:AddButton("Gladiator", function()
+        autofarm(tostring(toolname), "Gladiator", nil, "ColosseumQuest", 2)
+    end)
+
+    Autofarm:AddButton("Warden", function()
+        autofarm(tostring(toolname), "Warden", nil, "ImpelQuest", 1)
+    end)
+
+    Autofarm:AddButton("Chief Warden", function()
+        autofarm(tostring(toolname), "Chief Warden", nil, "ImpelQuest", 2)
+    end)
+
+    Autofarm:AddButton("Swan", function()
+        autofarm(tostring(toolname), "Swan", nil, "ImpelQuest", 3)
+    end)
+
+    Autofarm:AddButton("Military Soldier", function()
+        autofarm(tostring(toolname), "Soldier", nil, "MagmaQuest", 1)
+    end)
+
+    Autofarm:AddButton("Military Spy", function()
+        autofarm(tostring(toolname), "Spy", nil, "MagmaQuest", 2)
+    end)
+
+    Autofarm:AddButton("Magma Admiral", function()
+        autofarm(tostring(toolname), "Admiral", nil, "MagmaQuest", 3)
+    end)
+
+    Autofarm:AddButton("Fishman Warrior", function()
+        autofarm(tostring(toolname), "Fishman Warrior", nil, "FishmanQuest", 1)
+    end)
+
+    Autofarm:AddButton("Fishman Commando", function()
+    autofarm(tostring(toolname), "Commando", nil, "FishmanQuest", 2)
+    end)
+
+    Autofarm:AddButton("Fishman Jones", function()
+    autofarm(tostring(toolname), "Jones", nil, "FishmanQuest", 3)
+    end)
+
+    Autofarm:AddButton("God's Guard", function()
+    autofarm(tostring(toolname), "God's Guard", nil, "SkyExp1Quest", 1)
+    end)
+
+    Autofarm:AddButton("Shanda", function()
+    autofarm(tostring(toolname), "Shanda", nil, "SkyExp1Quest", 2)
+    end)
+
+    Autofarm:AddButton("Wysper", function()
+    autofarm(tostring(toolname), "Wysper", nil, "SkyExp1Quest", 3)
+    end)
+
+    Autofarm:AddButton("Royal Squad", function()
+    autofarm(tostring(toolname), "Royal Squad", nil, "SkyExp2Quest", 1)
+    end)
+
+    Autofarm:AddButton("Royal Soldier", function()
+    autofarm(tostring(toolname), "Royal Soldier", nil, "SkyExp2Quest", 2)
+    end)
+
+    Autofarm:AddButton("Thunder God", function()
+    autofarm(tostring(toolname), "Thunder God", nil, "SkyExp2Quest", 3)
+    end)
+
+    Autofarm:AddButton("Galley Pirate", function()
+    autofarm(tostring(toolname), "Galley Pirate", nil, "FountainQuest", 1)
+    end)
+
+    Autofarm:AddButton("Galley Captain", function()
+    autofarm(tostring(toolname), "Galley Captain", nil, "FountainQuest", 2)
+    end)
+
+    Autofarm:AddButton("Cyborg", function()
+    autofarm(tostring(toolname), "Cyborg", nil, "FountainQuest", 3)
+    end)
+
+    Autofarm:AddButton("Ice Admiral", function()
+    autofarm(tostring(toolname), "Ice Admiral", nil, nil, nil)
+    end)
 end
 
+if newworld then
+    Autofarm:AddSwitch("Toggle", function(bool)
+        _G.farm = bool
+        print(_G.farm)
+    end)
+
+    local toolname
+    local tooldropdown = Autofarm:AddDropdown("Use Tool", function(text)
+        if LocalPlayer.Backpack:FindFirstChild(tostring(text)) then
+            toolname = LocalPlayer.Backpack[tostring(text)]
+        end
+    end)
+
+    for i=1, #tools do
+        local tool = tools[i]
+        tooldropdown:Add(tostring(tool))
+    end
+
+    LocalPlayer.Backpack.ChildAdded:connect(function(child)
+        tooldropdown:Add(tostring(child.Name))
+    end)
+
+    Autofarm:AddButton("Raider", function()
+        teleport(CFrame.new(-121.149246, 39.0797539, 2369.0332, 0.968202889, 2.4016245e-08, 0.250166208, -1.94774046e-08, 1, -2.06189554e-08, -0.250166208, 1.50907447e-08, 0.968202889))
+        wait(1)
+    autofarm(tostring(toolname), "Raider", nil, "Area1Quest", 1)
+    end)
+
+    Autofarm:AddButton("Mercenary", function()
+        teleport(CFrame.new(-803.078003, 73.1196899, 1690.83899, 0.00951899588, 3.24957554e-08, 0.9999547, -2.01763513e-08, 1, -3.23051594e-08, -0.9999547, -1.98679242e-08, 0.00951899588))
+        wait(1)
+    autofarm(tostring(toolname), "Mercenary", nil, "Area1Quest", 2)
+    end)
+
+    Autofarm:AddButton("Diamond", function()
+        teleport(CFrame.new(-1711.10999, 198.646606, 36.8653908, 0.872542739, -6.97004552e-08, 0.488537759, 9.2724818e-08, 1, -2.29376589e-08, -0.488537759, 6.53136638e-08, 0.872542739))
+        wait(1)
+    autofarm(tostring(toolname), "Diamond", nil, "Area1Quest", 3)
+    end)
+
+    Autofarm:AddButton("Swan Pirate", function()
+        teleport(CFrame.new(893.166565, 73.0697327, 1147.42651, -0.999840379, -5.55143664e-08, -0.0178658348, -5.55763684e-08, 1, 2.97384384e-09, 0.0178658348, 3.9662873e-09, -0.999840379))
+        wait(1)
+    autofarm(tostring(toolname), "Swan Pirate", nil, "Area2Quest", 1)
+    end)
+
+    Autofarm:AddButton("Factory Staff", function()
+        teleport(CFrame.new(167.018753, 73.0686951, -164.64502, 0.725492358, -4.73446917e-08, -0.688230276, 1.24810228e-07, 1, 6.27757473e-08, 0.688230276, -1.31441496e-07, 0.725492358))
+        wait(1)
+    autofarm(tostring(toolname), "Factory Staff", nil, "Area2Quest", 2)
+    end)
+
+    Autofarm:AddButton("Jeremy", function()
+    autofarm(tostring(toolname), "Jeremy", nil, "Area2Quest", 3)
+    end)
+
+    Autofarm:AddButton("Marine Lieutenant", function()
+        teleport(CFrame.new(-2786.62183, 72.9661102, -3031.87476, -0.240379378, -9.12769167e-08, 0.970679045, 4.44070238e-08, 1, 1.05031063e-07, -0.970679045, 6.83522643e-08, -0.240379378))
+        wait(1)
+    autofarm(tostring(toolname), "Marine Lieutenant", nil, "MarineQuest3", 1)
+    end)
+
+    Autofarm:AddButton("Marine Captain", function()
+        teleport(CFrame.new(-2023.63354, 72.9661102, -3255.90576, 0.848725617, 9.29678279e-10, -0.528833508, -4.68628123e-08, 1, -7.34522132e-08, 0.528833508, 8.71233965e-08, 0.848725617))
+        wait(1)
+    autofarm(tostring(toolname), "Marine Captain", nil, "MarineQuest3", 2)
+    end)
+
+    Autofarm:AddButton("Fajita", function()
+        teleport(CFrame.new(-2153.6731, 72.9661102, -4241.20508, 0.999911308, 8.00685651e-09, -0.0133165959, -7.94380561e-09, 1, 4.78771467e-09, 0.0133165959, -4.68150585e-09, 0.999911308))
+        wait(1)
+    autofarm(tostring(toolname), "Fajita", nil, "MarineQuest3", 3)
+    end)
+
+    Autofarm:AddButton("Zombie", function()
+        teleport(CFrame.new(-5672.71143, 48.4801941, -655.884766, 0.428546607, -4.94537318e-08, 0.90351969, 1.18672972e-07, 1, -1.55300306e-09, -0.90351969, 1.07888901e-07, 0.428546607))
+        wait(1)
+    autofarm(tostring(toolname), "Zombie", nil, "ZombieQuest", 1)
+    end)
+
+    Autofarm:AddButton("Vampire", function()
+        teleport(CFrame.new(-5981.06445, 6.40269995, -1316.19409, 0.456913412, -9.74204681e-08, 0.889511168, 5.04610185e-08, 1, 8.36011438e-08, -0.889511168, 6.68715616e-09, 0.456913412))
+        wait(1)
+    autofarm(tostring(toolname), "Vampire", nil, "ZombieQuest", 2)
+    end)
+
+    Autofarm:AddButton("Snow Trooper", function()
+        teleport(CFrame.new(593.259888, 401.421936, -5546.1001, 0.986214757, 9.62643938e-08, -0.165470347, -1.06199984e-07, 1, -5.11970981e-08, 0.165470347, 6.80642813e-08, 0.986214757))
+        wait(1)
+    autofarm(tostring(toolname), "Snow Trooper", nil, "SnowMountainQuest", 1)
+    end)
+
+    Autofarm:AddButton("Winter Warrior", function()
+        teleport(CFrame.new(1331.75439, 429.421875, -5318.35547, 0.825170577, 5.72686742e-09, 0.56488359, -1.10307963e-09, 1, -8.52678017e-09, -0.56488359, 6.41293685e-09, 0.825170577))
+        wait(1)
+    autofarm(tostring(toolname), "Winter Warrior", nil, "SnowMountainQuest", 2)
+    end)
+
+    Autofarm:AddButton("Lab Subordinate", function()
+        teleport(CFrame.new(-5814.375, 15.9517574, -4429.76172, 0.364512295, -5.59861562e-08, 0.931198597, 2.32149766e-08, 1, 5.10353146e-08, -0.931198597, 3.01475378e-09, 0.364512295))
+        wait(1)
+    autofarm(tostring(toolname), "Lab Subordinate", nil, "IceSideQuest", 1)
+    end)
+
+    Autofarm:AddButton("Horned Warrior", function()
+        teleport(CFrame.new(-6361.49268, 26.559988, -5887.49414, -0.934038699, -1.2254131e-08, -0.357171863, 7.46332418e-09, 1, -5.38260885e-08, 0.357171863, -5.29413384e-08, -0.934038699))
+        wait(1)
+    autofarm(tostring(toolname), "Horned Warrior", nil, "IceSideQuest", 2)
+    end)
+
+    Autofarm:AddButton("Smoke Admiral", function()
+        teleport(CFrame.new(-5101.09131, 23.7314548, -5341.89941, 0.330702484, 9.46945411e-10, -0.943735063, 6.24650165e-10, 1, 1.22229094e-09, 0.943735063, -9.93718885e-10, 0.330702484))
+        wait(1)
+    autofarm(tostring(toolname), "Smoke Admiral", nil, "IceSideQuest", 3)
+    end)
+
+    Autofarm:AddButton("Magma Ninja", function()
+        teleport(CFrame.new(-5186.00635, 15.9518795, -6115.89355, -0.164513826, -4.62587586e-08, 0.986374795, 4.05046237e-08, 1, 5.36533662e-08, -0.986374795, 4.87794587e-08, -0.164513826))
+        wait(1)
+    autofarm(tostring(toolname), "Magma Ninja", nil, "FireSideQuest", 1)
+    end)
+
+    Autofarm:AddButton("Lava Pirate", function()
+        teleport(CFrame.new(-5133.50098, 16.1205902, -4837.5752, -0.196734294, 1.91304856e-08, -0.980456829, -1.89785787e-08, 1, 2.33199682e-08, 0.980456829, 2.31955148e-08, -0.196734294))
+        wait(1)
+    autofarm(tostring(toolname), "Lava Pirate", nil, "FireSideQuest", 2)
+    end)
+
+    Autofarm:AddButton("Swan Pirate (Barlito)", function()
+        teleport(CFrame.new(893.166565, 73.0697327, 1147.42651, -0.999840379, -5.55143664e-08, -0.0178658348, -5.55763684e-08, 1, 2.97384384e-09, 0.0178658348, 3.9662873e-09, -0.999840379))
+        wait(1)
+    autofarm(tostring(toolname), "Swan Pirate", nil, "BartiloQuest", 1)
+    end)
+
+    AutoStat:AddSwitch("Melee", function(bool)
+        _G.automelee = bool
+        print("Auto Melee is set to ".. tostring(_G.automelee))
+    end)
+
+    AutoStat:AddSwitch("Defense", function(bool)
+        _G.autodefense = bool
+        print("Auto Defense is set to ".. tostring(_G.autodefense))
+    end)
+
+    AutoStat:AddSwitch("Sword", function(bool)
+        _G.autosword = bool
+        print("Auto Sword is set to ".. tostring(_G.autosword))
+    end)
+
+    AutoStat:AddSwitch("Gun", function(bool)
+        _G.autogun = bool
+        print("Auto Gun is set to ".. tostring(_G.autogun))
+    end)
+
+    AutoStat:AddSwitch("Devil Fruit", function(bool)
+        _G.autodf = bool
+        print("Auto DF is set to ".. tostring(_G.autodf))
+    end)
+    game:GetService("RunService").Heartbeat:connect(function()
+        if _G.automelee then
+            wait(0.3)
+            game:GetService("ReplicatedStorage").Remotes["CommF_"]:InvokeServer("AddPoint", "Melee", 1)
+        end
+        if _G.autodefense then
+            wait(0.3)
+            game:GetService("ReplicatedStorage").Remotes["CommF_"]:InvokeServer("AddPoint", "Defense", 1)
+        end
+        if _G.autosword then
+            wait(0.3)
+            game:GetService("ReplicatedStorage").Remotes["CommF_"]:InvokeServer("AddPoint", "Sword", 1)
+        end
+        if _G.autogun then
+            wait(0.3)
+            game:GetService("ReplicatedStorage").Remotes["CommF_"]:InvokeServer("AddPoint", "Gun", 1)
+        end
+        if _G.autodf then
+            wait(0.3)
+            game:GetService("ReplicatedStorage").Remotes["CommF_"]:InvokeServer("AddPoint", "Demon Fruit", 1)
+        end
+    end)
+end
